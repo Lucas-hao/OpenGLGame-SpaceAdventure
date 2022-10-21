@@ -1,5 +1,5 @@
 #pragma once
-#include "Dependencies/glm/vec3.hpp"
+#include "dependencies/glm/vec3.hpp"
 
 class Light
 {

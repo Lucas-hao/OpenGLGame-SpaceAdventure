@@ -11,7 +11,7 @@ class Skybox
 {
 public:
     void Initialize();
-    void Draw(const Shader& shader);
+    void draw(const Shader& shader);
     unsigned int loadCubeMap(std::vector<std::string> faces);
     void setVAO(unsigned int vaoid);
     void setVBO(unsigned int vaoid);

@@ -1,9 +1,9 @@
 #include "Skybox.h"
 
 #ifdef _WIN32
-#include "Dependencies/glew/glew.h"
-#include "Dependencies/GLFW/glfw3.h"
-#include "Dependencies/stb_image/stb_image.h"
+#include "dependencies/glew/glew.h"
+#include "dependencies/GLFW/glfw3.h"
+#include "dependencies/stb_image/stb_image.h"
 #endif
 
 #ifdef linux
@@ -42,7 +42,7 @@ void Skybox::Initialize() {
 	glBindVertexArray(0);
 }
 
-void Skybox::Draw(const Shader& shader)
+void Skybox::draw(const Shader& shader)
 {
 	Camera globalCamera = Engine::getCamera();
 	// draw skybox as last

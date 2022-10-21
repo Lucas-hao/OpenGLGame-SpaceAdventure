@@ -1,8 +1,8 @@
 #pragma once
 
 #ifdef _WIN32
-#include "Dependencies/glm/glm.hpp"
-#include "Dependencies/glm/gtc/matrix_transform.hpp"
+#include "dependencies/glm/glm.hpp"
+#include "dependencies/glm/gtc/matrix_transform.hpp"
 #endif
 
 #ifdef linux
@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #endif
 #include "GameObject.h"
+#include "dependencies/GLFW/glfw3.h"
 
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
@@ -22,7 +23,12 @@ enum class CameraMovement
 	RIGHT
 };
 
-enum class CameraMode { ATTACH, FREE };
+enum class CameraMode
+{
+	ATTACH,			// the camera is attached to the spacecraft
+	MOVEMENT_FREE,	// the camera is free but can not rotate freely
+	ALL_FREE		// the camera is all free including movement and rotation, we can control with mouse 
+};
 
 // Default camera values
 constexpr float YAW = -90.0f;
@@ -49,10 +55,10 @@ private:
 	float mouseSensitivity;
 	float zoom;
 
-	CameraMode cameraMode = CameraMode::FREE;
-	GameObject* attachedObject = nullptr;
+	CameraMode cameraMode = CameraMode::MOVEMENT_FREE;
 
 public:
+	
 	// constructor with vectors
 	Camera(glm::vec3 initPosition = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
 	       float initYaw = YAW, float initPitch = PITCH);
@@ -69,13 +75,18 @@ public:
 	// processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
 	void cameraScroll(float yoffset);
 
-	void updateCamera(glm::vec3 newPosition, glm::vec3 newCenter);
+	void updateCameraVectors(glm::vec3 newPosition, glm::vec3 newCenter);
 
+	void guiRender();
 
 	glm::mat4 getViewMatrix() const { return glm::lookAt(position, position + front, up); }
 	glm::vec3 getPosition() const { return position; }
 	CameraMode getMode() const { return cameraMode; }
-	void toggleMode() { cameraMode = (cameraMode == CameraMode::FREE ? CameraMode::ATTACH : CameraMode::FREE); }
+	void setMode(CameraMode mode) { cameraMode = mode; }
+	void toggleMode()
+	{
+
+	}
 
 private:
 	// calculates the front vector from the Camera's (updated) Euler Angles

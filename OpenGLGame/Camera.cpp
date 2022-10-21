@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include "dependencies/imgui/imgui.h"
+
 // constructor with vectors
 Camera::Camera(glm::vec3 initPosition, glm::vec3 up, float initYaw, float initPitch) :
 	front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(SPEED), mouseSensitivity(SENSITIVITY), zoom(ZOOM)
@@ -46,8 +48,6 @@ void Camera::cameraRotate(float xoffset, float yoffset, GLboolean constrainPitch
 	yaw += xoffset;
 	pitch += yoffset;
 
-	std::cout << "Rotation" << yaw << ", " << pitch << std::endl;
-
 	// make sure that when pitch is out of bounds, screen doesn't get flipped
 	if (constrainPitch)
 	{
@@ -72,21 +72,55 @@ void Camera::cameraScroll(float yoffset)
 }
 
 
-
-void Camera::updateCamera(glm::vec3 newPosition, glm::vec3 newCenter)
+void Camera::updateCameraVectors(glm::vec3 newPosition, glm::vec3 newCenter)
 {
-	this->position = newPosition;
-	this->front = newCenter - newPosition;
-	updateCameraVectors();
+	position = newPosition;
+	front = glm::normalize(newCenter - newPosition);
+	right = glm::normalize(glm::cross(front, worldUp));
+	up = glm::normalize(glm::cross(right, front));
+	pitch = glm::degrees(glm::asin(front.y));
+	float sinYaw = glm::degrees(glm::asin(front.z / glm::cos(glm::radians(pitch))));
+	float cosYaw = glm::degrees(glm::acos(front.x / glm::cos(glm::radians(pitch))));
+	if ((sinYaw > 0 && cosYaw > 0) || (sinYaw < 0 && cosYaw > 0))
+	{
+		yaw = sinYaw;
+	} else if (sinYaw > 0.0f && cosYaw < 0.0f)
+	{
+		yaw = cosYaw;
+	} else if (sinYaw < 0.0f && cosYaw < 0.0f)
+	{
+		yaw = -90.0f - sinYaw;
+	}
 }
 
+void Camera::guiRender()
+{
+	if (ImGui::CollapsingHeader("Camera"))
+	{
+		ImGui::DragFloat3("Camera position", &position[0], 0.1, -200, 200.0f);
+
+		ImGui::DragFloat("Yaw", &yaw, 0.1, -180.0f, 180.0f);
+		ImGui::DragFloat("Pitch", &pitch, 0.1, -180.0f, 180.0f);
+		ImGui::DragFloat("Camera speed", &movementSpeed, 0.1, 2.5f, 100.0f);
+		ImGui::Text("Front vector: (%.2f, %0.2f, %0.2f)", front.x, front.y, front.z);
+		ImGui::Text("Right vector: (%.2f, %0.2f, %0.2f)", right.x, right.y, right.z);
+		ImGui::Text("Up vector: (%.2f, %0.2f, %0.2f)", up.x, up.y, up.z);
+		updateCameraVectors();
+	}
+}
+
+/*
+ * x = cos(y)cos(p)
+ * y = sin(p)
+ * z = sin(y)cos(p)
+ */
 void Camera::updateCameraVectors()
 {
 	// calculate the new Front vector
 	glm::vec3 newFront;
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	newFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	newFront.y = sin(glm::radians(pitch));
+	newFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front = glm::normalize(newFront);
 	// also re-calculate the Right and Up vector
 	right = glm::normalize(glm::cross(front, worldUp));

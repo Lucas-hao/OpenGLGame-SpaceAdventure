@@ -1,6 +1,6 @@
 #include "Shader.h"
 #ifdef _WIN32
-#include "Dependencies/glm/gtc/type_ptr.hpp"
+#include "dependencies/glm/gtc/type_ptr.hpp"
 #endif
 
 #ifdef linux

@@ -57,6 +57,30 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="UserWidget.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui_demo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui_draw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui_impl_glfw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui_impl_opengl3.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui_tables.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dependencies\imgui\imgui_widgets.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -89,31 +113,60 @@
     <ClInclude Include="Light.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="UserWidget.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imconfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui_impl_glfw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui_impl_opengl3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui_impl_opengl3_loader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imgui_internal.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imstb_rectpack.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imstb_textedit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dependencies\imgui\imstb_truetype.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
-    <None Include="FragmentShaderCode.glsl">
+    <None Include="shader\SkyboxVertex.glsl">
       <Filter>资源文件\Shader</Filter>
     </None>
-    <None Include="InstanceFragmentShader.glsl">
+    <None Include="shader\VertexShaderCode.glsl">
       <Filter>资源文件\Shader</Filter>
     </None>
-    <None Include="InstanceVertexShader.glsl">
+    <None Include="shader\SkyboxFragment.glsl">
       <Filter>资源文件\Shader</Filter>
     </None>
-    <None Include="planetf.glsl">
+    <None Include="shader\planetv.glsl">
       <Filter>资源文件\Shader</Filter>
     </None>
-    <None Include="planetv.glsl">
+    <None Include="shader\planetf.glsl">
       <Filter>资源文件\Shader</Filter>
     </None>
-    <None Include="SkyboxFragment.glsl">
+    <None Include="shader\InstanceVertexShader.glsl">
       <Filter>资源文件\Shader</Filter>
     </None>
-    <None Include="SkyboxVertex.glsl">
+    <None Include="shader\InstanceFragmentShader.glsl">
       <Filter>资源文件\Shader</Filter>
     </None>
-    <None Include="VertexShaderCode.glsl">
+    <None Include="shader\FragmentShaderCode.glsl">
       <Filter>资源文件\Shader</Filter>
     </None>
   </ItemGroup>

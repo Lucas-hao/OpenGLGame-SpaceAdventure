@@ -1,7 +1,7 @@
 #include "Model.h"
 
-#include "Dependencies/stb_image/stb_image.h"
-#include "Dependencies/assimp/postprocess.h"
+#include "dependencies/stb_image/stb_image.h"
+#include "dependencies/assimp/postprocess.h"
 
 unsigned int textureFromFile(const char* path, const string& directory, bool gamma)
 {

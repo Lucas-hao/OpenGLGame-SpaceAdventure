@@ -1,8 +1,8 @@
 #pragma once
 
 #ifdef _WIN32
-#include "Dependencies/assimp/Importer.hpp"
-#include "Dependencies/assimp/scene.h"
+#include "dependencies/assimp/Importer.hpp"
+#include "dependencies/assimp/scene.h"
 #endif
 
 #ifdef linux

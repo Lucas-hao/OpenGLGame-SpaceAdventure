@@ -1,25 +1,12 @@
-#ifdef _WIN32
-#include "Dependencies/glew/glew.h"
-#include "Dependencies/GLFW/glfw3.h"
-#endif
-
-#ifdef linux
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#endif
-
-#include "GameObject.h"
-#include "Shader.h"
-#include "ColorTexture.h"
-#include "Camera.h"
-#include "Skybox.h"
+#include "Engine.h"
+#include "dependencies/glew/glew.h"
+#include "dependencies/GLFW/glfw3.h"
+#include "dependencies/imgui/imgui.h"
+#include "dependencies/imgui/imgui_impl_glfw.h"
+#include "dependencies/imgui/imgui_impl_opengl3.h"
 
 #include <iostream>
-#include <vector>
 
-#include "Engine.h"
 
 #define SCR_WIDTH 1080
 #define SCR_HEIGHT 720
@@ -71,7 +58,7 @@
 
 // Shader shader;
 // Shader instanceShader;
-//Shader skyboxShader;
+// Shader skyboxShader;
 // Shader planetShader;
 // Camera camera;
 
@@ -263,7 +250,7 @@
 // 	frames += 1;
 //
 // 	// update camera
-// 	camera.updateCamera(glm::vec3(spacecraft.getModelMatrix() * glm::vec4(0, 1032, -1544, 1)),
+// 	camera.updateCameraVectors(glm::vec3(spacecraft.getModelMatrix() * glm::vec4(0, 1032, -1544, 1)),
 // 		spacecraft.getModelMatrix() * glm::vec4(0, 0, 1544, 1.0f));
 //
 // 	// Rendering
@@ -448,50 +435,19 @@
 
 int main(int argc, char* argv[])
 {
-	GLFWwindow* window;
-
-	/* initialize the glfw */
-	if (!glfwInit()) {
-		std::cout << "Failed to initialize GLFW" << std::endl;
-		return -1;
-	}
-
-	/* glfw: configure; necessary for MAC */
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Spacecraft Adventure", NULL, NULL);
-	if (!window) {
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
-
-	/* ask glfw to capture our cursor */
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 	Engine& gameEngine = Engine::getEngine();
-	Engine::initializeCallback(window);
+	gameEngine.execute();
+	// while (!glfwWindowShouldClose(window))
+	// {
+	// 	/* Render here */
+	// 	gameEngine.render();
+	// 	/* Swap front and back buffers */
+	// 	glfwSwapBuffers(window);
+	// 	/* Poll for and process events */
+	// 	glfwPollEvents();
+	// }
 
-	while (!glfwWindowShouldClose(window)) {
-		/* Render here */
-		gameEngine.render();
-		/* Swap front and back buffers */
-		glfwSwapBuffers(window);
-		/* Poll for and process events */
-		glfwPollEvents();
-	}
-
-	glfwTerminate();
+	// glfwTerminate();
 	return 0;
 }
 

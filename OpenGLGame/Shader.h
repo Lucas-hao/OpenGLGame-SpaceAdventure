@@ -1,7 +1,7 @@
 #pragma once
 #ifdef _WIN32
-#include "Dependencies/glew/glew.h"
-#include "Dependencies/glm/glm.hpp"
+#include "dependencies/glew/glew.h"
+#include "dependencies/glm/glm.hpp"
 #endif
 
 #ifdef linux
