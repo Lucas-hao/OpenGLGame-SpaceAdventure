@@ -26,9 +26,9 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 
 
 // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-void Camera::cameraMovement(CameraMovement direction, float deltaTime)
+void Camera::cameraMovement(CameraMovement direction, double deltaTime)
 {
-	float velocity = movementSpeed * deltaTime;
+	float velocity = movementSpeed * static_cast<float>(deltaTime);
 	if (direction == CameraMovement::FORWARD)
 		position += front * velocity;
 	if (direction == CameraMovement::BACKWARD)
@@ -81,15 +81,16 @@ void Camera::updateCameraVectors(glm::vec3 newPosition, glm::vec3 newCenter)
 	pitch = glm::degrees(glm::asin(front.y));
 	float sinYaw = glm::degrees(glm::asin(front.z / glm::cos(glm::radians(pitch))));
 	float cosYaw = glm::degrees(glm::acos(front.x / glm::cos(glm::radians(pitch))));
-	if ((sinYaw > 0 && cosYaw > 0) || (sinYaw < 0 && cosYaw > 0))
+	if (cosYaw < 90.0f)
+	// yaw : -90 - 90
 	{
 		yaw = sinYaw;
-	} else if (sinYaw > 0.0f && cosYaw < 0.0f)
+	} else if (sinYaw > 0.0f && cosYaw > 90.0f)		// 90 - 180
 	{
 		yaw = cosYaw;
-	} else if (sinYaw < 0.0f && cosYaw < 0.0f)
+	} else if (sinYaw < 0.0f && cosYaw > 90.0f)		// -180 - -90
 	{
-		yaw = -90.0f - sinYaw;
+		yaw = -180.0f - sinYaw;
 	}
 }
 
@@ -97,11 +98,11 @@ void Camera::guiRender()
 {
 	if (ImGui::CollapsingHeader("Camera"))
 	{
-		ImGui::DragFloat3("Camera position", &position[0], 0.1, -200, 200.0f);
+		ImGui::DragFloat3("Camera position", &position[0], 0.1f, -200.0f, 200.0f);
 
-		ImGui::DragFloat("Yaw", &yaw, 0.1, -180.0f, 180.0f);
-		ImGui::DragFloat("Pitch", &pitch, 0.1, -180.0f, 180.0f);
-		ImGui::DragFloat("Camera speed", &movementSpeed, 0.1, 2.5f, 100.0f);
+		ImGui::DragFloat("Yaw", &yaw, 0.1f, -180.0f, 180.0f);
+		ImGui::DragFloat("Pitch", &pitch, 0.1f, -180.0f, 180.0f);
+		ImGui::DragFloat("Camera speed", &movementSpeed, 0.1f, 2.5f, 100.0f);
 		ImGui::Text("Front vector: (%.2f, %0.2f, %0.2f)", front.x, front.y, front.z);
 		ImGui::Text("Right vector: (%.2f, %0.2f, %0.2f)", right.x, right.y, right.z);
 		ImGui::Text("Up vector: (%.2f, %0.2f, %0.2f)", up.x, up.y, up.z);
@@ -118,9 +119,9 @@ void Camera::updateCameraVectors()
 {
 	// calculate the new Front vector
 	glm::vec3 newFront;
-	newFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	newFront.y = sin(glm::radians(pitch));
-	newFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	newFront.x = glm::cos(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
+	newFront.y = glm::sin(glm::radians(pitch));
+	newFront.z = glm::sin(glm::radians(yaw)) * glm::cos(glm::radians(pitch));
 	front = glm::normalize(newFront);
 	// also re-calculate the Right and Up vector
 	right = glm::normalize(glm::cross(front, worldUp));

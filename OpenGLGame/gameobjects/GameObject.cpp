@@ -1,6 +1,6 @@
 #include "GameObject.h"
 
-#include "dependencies/imgui/imgui.h"
+#include "../dependencies/imgui/imgui.h"
 
 GameObject::GameObject(const string& modelPath)
 {
@@ -66,9 +66,9 @@ void GameObject::guiRender()
 }
 
 
-void GameObject::objectMovement(TranslationDirection direction, GLfloat deltaTime)
+void GameObject::objectMovement(TranslationDirection direction, double deltaTime)
 {
-    if (bMovable) translation(direction, movementSpeed * deltaTime);
+    if (bMovable) translation(direction, movementSpeed * static_cast<float>(deltaTime));
 }
 
 void GameObject::translation(TranslationDirection direction, GLfloat distance)

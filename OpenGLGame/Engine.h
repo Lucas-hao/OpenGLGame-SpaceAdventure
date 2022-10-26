@@ -5,11 +5,11 @@
 
 #include "Camera.h"
 #include "ColorTexture.h"
-#include "GameObject.h"
-#include "Light.h"
-#include "Rocks.h"
-#include "Skybox.h"
 #include "dependencies/GLFW/glfw3.h"
+#include "gameobjects/GameObject.h"
+#include "gameobjects/Rocks.h"
+#include "Light.h"
+#include "Skybox.h"
 
 
 #define SCR_WIDTH 1080
@@ -32,15 +32,11 @@ public:
     }
 
 private:
-    glm::mat4 projMatrix = glm::mat4(1.0f);
-    GLFWwindow* globalWindow = nullptr;
-
     // Object in this game
     GameObject spaceCraft;
     GameObject planet;
     Rocks rocks;
     std::array<GameObject, 3> enemyCrafts;
-
     // Textures
     ColorTexture earthNormalTexture;
     ColorTexture earthColorTexture;
@@ -50,35 +46,38 @@ private:
     ColorTexture rockTexture;
     ColorTexture goldTexture;
     ColorTexture sapphireTexture;
-
     // Shaders
     Shader defaultShader;
     Shader planetShader;
     Shader rockInstanceShader;
     Shader skyboxShader;
+    // Camera
+    Camera camera = Camera(glm::vec3(0.0f, 0.0f, 88.0f));
+    // Light
+    Light light0;
+    Light light1;
+    // Skybox
+    Skybox skybox;
+
+
+    glm::mat4 projMatrix = glm::mat4(1.0f);
+    GLFWwindow* globalWindow = nullptr;
 
     // time
     double lastFrameTime = 0.0;
     double deltaTime = 0.0;
     int fps = 0;
 
-    // Camera
-    Camera camera = Camera(glm::vec3(0.0f, 0.0f, 88.0f));
-
-    // Light
-    Light light0;
-    Light light1;
-
     // rotation speed
-    float craftRotateSpeed = 20;
-    float planetRotateSpeed = 20;
-
-    // Skybox
-    Skybox skybox;
+    float craftRotateSpeed = 20.0f;
+    float planetRotateSpeed = 20.0f;
+    float enemyMovementSpeed = 10.0f;
 
     // Interaction
-    float lastMousePosX = 0.0f;
-    float lastMousePosY = 0.0f;
+    double lastMousePosX = 0.0;
+    double lastMousePosY = 0.0;
+    int initX = 0;
+    int initY = 0;
 
 private:
     Engine() = default;
@@ -89,6 +88,7 @@ private:
 
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos);
+    static void frameResizeCallback(GLFWwindow* window, int width, int height);
     static void getOpenGLInfo();
 
 public:
@@ -152,25 +152,16 @@ public:
     void lightIntensityControl(float delta)
     {
         float intensity = light0.getIntensity() + delta;
-        intensity = min(1.0f, intensity);
-        intensity = max(0.0f, intensity);
+        intensity = std::min(1.0f, intensity);
+        intensity = std::max(0.0f, intensity);
         light0.setIntensity(intensity);
     }
 
     glm::vec3 getSpaceCraftLoc() const { return spaceCraft.getPosition(); }
+    ColorTexture getRockTexture() const { return rockTexture; }
+    ColorTexture getGoldTexture() const { return goldTexture; }
+    ColorTexture getSapphireTexture() const { return sapphireTexture; }
 
-    ColorTexture getRockTexture() const
-    {
-        return rockTexture;
-    }
-
-    ColorTexture getGoldTexture() const
-    {
-        return goldTexture;
-    }
-
-    ColorTexture getSapphireTexture() const
-    {
-        return sapphireTexture;
-    }
+    void setInitX(int xx) { if (xx >= 0) initX = xx; }
+    void setInitY(int yy) { if (yy >= 0) initY = yy; }
 };

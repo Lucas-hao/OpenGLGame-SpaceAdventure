@@ -1,18 +1,9 @@
 #pragma once
 
-#ifdef _WIN32
 #include "dependencies/glm/glm.hpp"
 #include "dependencies/glm/gtc/matrix_transform.hpp"
-#endif
-
-#ifdef linux
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#endif
-#include "GameObject.h"
+#include "gameobjects/GameObject.h"
 #include "dependencies/GLFW/glfw3.h"
-
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum class CameraMovement
@@ -67,7 +58,7 @@ public:
 	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float initYaw, float initPitch);
 
 	// processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-	void cameraMovement(CameraMovement direction, float deltaTime);
+	void cameraMovement(CameraMovement direction, double deltaTime);
 
 	// processes input received from a mouse input system. Expects the offset value in both the x and y direction.
 	void cameraRotate(float xoffset, float yoffset, GLboolean constrainPitch = true);

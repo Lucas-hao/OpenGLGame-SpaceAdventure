@@ -1,6 +1,5 @@
 #include "Engine.h"
 
-#include "Rocks.h"
 #include "dependencies/GLFW/glfw3.h"
 #include "dependencies/imgui/imgui_impl_glfw.h"
 #include "dependencies/imgui/imgui_impl_opengl3.h"
@@ -46,9 +45,9 @@ void Engine::initialize()
     }
 
     getOpenGLInfo();
-
     glfwSetKeyCallback(globalWindow, keyCallback);
     glfwSetCursorPosCallback(globalWindow, cursorPositionCallback);
+    glfwSetFramebufferSizeCallback(globalWindow, frameResizeCallback);
 
     // Light setup
     light0.setPosition(glm::vec3(0.0f, 30.0f, 0.0f));
@@ -62,36 +61,36 @@ void Engine::initialize()
 
     // Default game object initialization
     // Rocks rocks;
-    spaceCraft.initialize("SpaceCraft", "object/spacecraft.obj", glm::vec3(0.0f, -1.0f, 80.0f),
+    spaceCraft.initialize("SpaceCraft", "resources/object/spacecraft.obj", glm::vec3(0.0f, -1.0f, 80.0f),
                           glm::vec3(0.005f, 0.005f, 0.005f),
                           glm::vec3(0.0f, 180.0f, 0.0f));
-    enemyCrafts[0].initialize("EnemyCraft0", "object/craft.obj", glm::vec3(0.0f, 0.0f, 0.0f),
+    enemyCrafts[0].initialize("EnemyCraft0", "resources/object/craft.obj", glm::vec3(-30.0f, 0.0f, 30.0f),
                               glm::vec3(0.3f, 0.3f, 0.3f));
-    enemyCrafts[1].initialize("EnemyCraft1", "object/craft.obj", glm::vec3(0.0f, 0.0f, 0.0f),
+    enemyCrafts[1].initialize("EnemyCraft1", "resources/object/craft.obj", glm::vec3(0.0f, 0.0f, 40.0f),
                               glm::vec3(0.3f, 0.3f, 0.3f));
-    enemyCrafts[2].initialize("EnemyCraft2", "object/craft.obj", glm::vec3(0.0f, 0.0f, 0.0f),
+    enemyCrafts[2].initialize("EnemyCraft2", "resources/object/craft.obj", glm::vec3(30.0f, 0.0f, 50.0f),
                               glm::vec3(0.3f, 0.3f, 0.3f));
     planet.initialize("Planet", "object/planet.obj", glm::vec3(0, 0, 0.0f), glm::vec3(2, 2, 2),
                       glm::vec3(0.0f, 0.0f, 0.0f));
     rocks.initialize("Rocks", "object/rock.obj");
     planet.setMovable(false);
 
-
     // Default texture initialization
-    spaceCraftTexture.setupTexture("texture/spacecraftTexture.bmp");
-    enemyTravelTexture.setupTexture("texture/ringTexture.bmp");
-    enemyAlertTexture.setupTexture("texture/red.bmp");
-    earthColorTexture.setupTexture("texture/earthTexture.bmp");
-    earthNormalTexture.setupTexture("texture/earthNormal.bmp");
-    rockTexture.setupTexture("texture/rockTexture.bmp");
-    goldTexture.setupTexture("texture/gold.bmp");
-    sapphireTexture.setupTexture("texture/sapphire.bmp");
+    spaceCraftTexture.setupTexture("resources/texture/spacecraftTexture.bmp");
+    enemyTravelTexture.setupTexture("resources/texture/ringTexture.bmp");
+    enemyAlertTexture.setupTexture("resources/texture/red.bmp");
+    earthColorTexture.setupTexture("resources/texture/earthTexture.bmp");
+    earthNormalTexture.setupTexture("resources/texture/earthNormal.bmp");
+    rockTexture.setupTexture("resources/texture/rockTexture.bmp");
+    goldTexture.setupTexture("resources/texture/gold.bmp");
+    sapphireTexture.setupTexture("resources/texture/sapphire.bmp");
 
     // shader set up
-    defaultShader.setupShader("shader/VertexShaderCode.glsl", "shader/FragmentShaderCode.glsl");
-    planetShader.setupShader("shader/planetv.glsl", "shader/planetf.glsl");
-    rockInstanceShader.setupShader("shader/InstanceVertexShader.glsl", "shader/InstanceFragmentShader.glsl");
-    skyboxShader.setupShader("shader/SkyboxVertex.glsl", "shader/SkyboxFragment.glsl");
+    defaultShader.setupShader("resources/shader/VertexShaderCode.glsl", "resources/shader/FragmentShaderCode.glsl");
+    planetShader.setupShader("resources/shader/planetv.glsl", "resources/shader/planetf.glsl");
+    rockInstanceShader.setupShader("resources/shader/InstanceVertexShader.glsl",
+                                   "resources/shader/InstanceFragmentShader.glsl");
+    skyboxShader.setupShader("resources/shader/SkyboxVertex.glsl", "resources/shader/SkyboxFragment.glsl");
 
     planetShader.use();
     planetShader.setInt("diffuseMap", 0);
@@ -117,7 +116,7 @@ void Engine::initialize()
 void Engine::render()
 {
     glm::mat4 viewMatrix = camera.getViewMatrix();
-    
+
     defaultShader.use();
     defaultShader.setMat4("proj", projMatrix);
     defaultShader.setMat4("view", viewMatrix);
@@ -144,6 +143,10 @@ void Engine::render()
     spaceCraftTexture.bind(0);
     spaceCraft.draw(defaultShader);
     rocks.drawSpecialRocks(defaultShader);
+    enemyTravelTexture.bind(0);
+    enemyCrafts[0].draw(defaultShader);
+    enemyCrafts[1].draw(defaultShader);
+    enemyCrafts[2].draw(defaultShader);
 
     planetShader.use();
     planetShader.setMat4("proj", projMatrix);
@@ -233,13 +236,15 @@ void Engine::renderGui()
         ImGui::Text("All free camera mode");
         break;
     }
-    planet.guiRender();
     spaceCraft.guiRender();
+    enemyCrafts[0].guiRender();
+    enemyCrafts[1].guiRender();
+    enemyCrafts[2].guiRender();
+    planet.guiRender();
     camera.guiRender();
     rocks.guiRender();
     ImGui::End();
 
-    // Rendering
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -251,16 +256,14 @@ void Engine::execute()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.3f, 0.3f, 0.3f, 0.3f);
-        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glViewport(initX, initY, SCR_WIDTH, SCR_HEIGHT);
 
         render();
         renderGui();
-        tick();
 
-        /* Swap front and back buffers */
         glfwSwapBuffers(globalWindow);
-        /* Poll for and process events */
         glfwPollEvents();
+        tick();
     }
     terminate();
 }
@@ -275,9 +278,8 @@ void Engine::terminate()
     ImGui::DestroyContext();
 }
 
-void Engine::tick()
+void Engine::calculateFps()
 {
-    // A rough calculation of fps
     static int numOfFrames = 0;
     static double lastSecTime = 0.0;
     double currentTime = glfwGetTime();
@@ -290,6 +292,13 @@ void Engine::tick()
         lastSecTime = currentTime;
     }
     lastFrameTime = glfwGetTime();
+}
+
+
+void Engine::tick()
+{
+    // A rough calculation of fps
+    calculateFps();
 
     if (camera.getMode() == CameraMode::ATTACH)
     {
@@ -299,89 +308,125 @@ void Engine::tick()
     }
 
     planet.setRotationYaw(0.5f * static_cast<float>(glfwGetTime()) * planetRotateSpeed);
+    float newVerticalOffset[3] = {
+        enemyCrafts[0].getPosition().x, enemyCrafts[1].getPosition().x, enemyCrafts[2].getPosition().x
+    };
+
+    static bool bPositiveDir[3] = {true, true, true};
+    for (size_t i = 0; i < 3; ++i)
+    {
+        if (bPositiveDir[i])
+        {
+            newVerticalOffset[i] += static_cast<float>(deltaTime) * enemyMovementSpeed;
+            newVerticalOffset[i] -= 200.0f * static_cast<int>((newVerticalOffset[i] + 50.0f) / 200.0f);
+            if (newVerticalOffset[i] > 50.0f)
+            {
+                newVerticalOffset[i] = 100.0f - newVerticalOffset[i];
+                bPositiveDir[i] = false;
+            }
+        }
+        else
+        {
+            newVerticalOffset[i] -= static_cast<float>(deltaTime) * enemyMovementSpeed;
+            newVerticalOffset[i] -= 200.0f * static_cast<int>((newVerticalOffset[i] + 50.0f) / 200.0f);
+            if (newVerticalOffset[i] < -50.0f)
+            {
+                newVerticalOffset[i] = -100.0f - newVerticalOffset[i];
+                bPositiveDir[i] = true;
+            }
+        }
+        enemyCrafts[i].setPosition(glm::vec3(newVerticalOffset[i], 0.0f, 30.0f + 10 * i));
+    }
     rocks.tick();
 }
 
 void Engine::cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    Engine& tmpEngine = getEngine();
+    Engine& engine = getEngine();
     static bool firstMouseMovement = true;
     if (firstMouseMovement)
     {
         firstMouseMovement = false;
-        tmpEngine.lastMousePosX = xpos;
-        tmpEngine.lastMousePosY = ypos;
+        engine.lastMousePosX = static_cast<float>(xpos);
+        engine.lastMousePosY = static_cast<float>(ypos);
     }
 
-    float xoffset = static_cast<float>(xpos) - tmpEngine.lastMousePosX;
-    float yoffset = tmpEngine.lastMousePosY - static_cast<float>(ypos);
+    double xoffset = xpos - engine.lastMousePosX;
+    double yoffset = engine.lastMousePosY - ypos;
     // reversed since y-coordinates go from bottom to top
 
-    float deltaX = tmpEngine.lastMousePosX - static_cast<float>(xpos);
-    if (tmpEngine.camera.getMode() == CameraMode::ATTACH)
+    float deltaX = static_cast<float>(engine.lastMousePosX - xpos);
+    if (engine.camera.getMode() == CameraMode::ATTACH)
     {
-        tmpEngine.spaceCraftRotation(GameObject::RotationDirection::Y_AXIS, deltaX * 0.01);
+        engine.spaceCraftRotation(GameObject::RotationDirection::Y_AXIS, deltaX * 0.01f);
     }
-    else if (tmpEngine.camera.getMode() == CameraMode::ALL_FREE)
+    else if (engine.camera.getMode() == CameraMode::ALL_FREE)
     {
-        tmpEngine.cameraRotation(xoffset, yoffset);
+        engine.cameraRotation(static_cast<float>(xoffset), static_cast<float>(yoffset));
     }
-    tmpEngine.lastMousePosX = xpos;
-    tmpEngine.lastMousePosY = ypos;
+    engine.lastMousePosX = xpos;
+    engine.lastMousePosY = ypos;
+}
+
+void Engine::frameResizeCallback(GLFWwindow* window, int width, int height)
+{
+    Engine& engine = getEngine();
+    engine.setInitX((width - SCR_WIDTH) / 2);
+    engine.setInitY((height - SCR_HEIGHT) / 2);
 }
 
 void Engine::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    Engine& tmpEngine = getEngine();
+    Engine& engine = getEngine();
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
     }
-    switch (tmpEngine.camera.getMode())
+    switch (engine.camera.getMode())
     {
     case CameraMode::ATTACH:
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         {
-            tmpEngine.spacecraftMovement(GameObject::TranslationDirection::FRONT);
+            engine.spacecraftMovement(GameObject::TranslationDirection::FRONT);
         }
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         {
-            tmpEngine.spacecraftMovement(GameObject::TranslationDirection::BACK);
+            engine.spacecraftMovement(GameObject::TranslationDirection::BACK);
         }
     // Notice that our view point are from the camera
     // so the right and left translation are reversed
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         {
-            tmpEngine.spacecraftMovement(GameObject::TranslationDirection::RIGHT);
+            engine.spacecraftMovement(GameObject::TranslationDirection::RIGHT);
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         {
-            tmpEngine.spacecraftMovement(GameObject::TranslationDirection::LEFT);
+            engine.spacecraftMovement(GameObject::TranslationDirection::LEFT);
         }
         break;
     case CameraMode::MOVEMENT_FREE:
     case CameraMode::ALL_FREE:
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         {
-            tmpEngine.cameraMovement(CameraMovement::FORWARD);
+            engine.cameraMovement(CameraMovement::FORWARD);
         }
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         {
-            tmpEngine.cameraMovement(CameraMovement::BACKWARD);
+            engine.cameraMovement(CameraMovement::BACKWARD);
         }
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         {
-            tmpEngine.cameraMovement(CameraMovement::LEFT);
+            engine.cameraMovement(CameraMovement::LEFT);
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         {
-            tmpEngine.cameraMovement(CameraMovement::RIGHT);
+            engine.cameraMovement(CameraMovement::RIGHT);
         }
         break;
     }
-    if (key == GLFW_KEY_Q && action == GLFW_PRESS) { tmpEngine.lightIntensityControl(0.1f); }
-    if (key == GLFW_KEY_E && action == GLFW_PRESS) { tmpEngine.lightIntensityControl(-0.1f); }
-    if (key == GLFW_KEY_TAB && action == GLFW_PRESS) { tmpEngine.cameraToggleMode(); }
+    if (key == GLFW_KEY_Q && action == GLFW_PRESS) { engine.lightIntensityControl(0.1f); }
+    if (key == GLFW_KEY_E && action == GLFW_PRESS) { engine.lightIntensityControl(-0.1f); }
+    if (key == GLFW_KEY_TAB && action == GLFW_PRESS) { engine.cameraToggleMode(); }
 }
 
 void Engine::getOpenGLInfo()

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Model.h"
-#include "dependencies/glm/glm.hpp"
+#include "../Model.h"
+#include "../dependencies/glm/glm.hpp"
 
 
 class GameObject
@@ -57,7 +57,7 @@ public:
     virtual void guiRender();
 
     void toggleTick(bool enable) { bEnableTick = enable; }
-    void objectMovement(TranslationDirection direction, GLfloat deltaTime);
+    void objectMovement(TranslationDirection direction, double deltaTime);
     void translation(TranslationDirection direction, GLfloat distance);
     void rotation(RotationDirection direction, GLfloat degree);
 

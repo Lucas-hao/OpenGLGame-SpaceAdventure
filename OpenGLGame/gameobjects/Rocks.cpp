@@ -2,8 +2,8 @@
 
 #include <random>
 
-#include "Engine.h"
-#include "dependencies/imgui/imgui.h"
+#include "../Engine.h"
+#include "../dependencies/imgui/imgui.h"
 
 Rocks::Rocks()
 {
@@ -27,8 +27,8 @@ Rocks::Rocks()
         displacementNoise[i] = glm::vec3(displacementXDist(engine), displacementYDist(engine),
                                          displacementZDist(engine));
         rotationNoise[i] = glm::vec3(rotationDist(engine), rotationDist(engine), rotationDist(engine));
-        scaleNoise[i] = scaleDist(engine);
-        orbitAngle[i] = orbitAngleDist(engine);
+        scaleNoise[i] = static_cast<float>(scaleDist(engine));
+        orbitAngle[i] = static_cast<float>(orbitAngleDist(engine));
     }
 }
 
@@ -85,7 +85,7 @@ void Rocks::initialize(const string& objectName, const string& modelPath, glm::v
 void Rocks::tick()
 {
     Engine& engine = Engine::getEngine();
-    float deltaTime = engine.getDeltaTime();
+    float deltaTime = static_cast<float>(engine.getDeltaTime());
     glm::vec3 spaceCraftLoc = engine.getSpaceCraftLoc();
     for (int i = 0; i < totalNum; ++i)
     {
@@ -122,9 +122,9 @@ void Rocks::guiRender()
 {
     if (!ImGui::CollapsingHeader(objectName.c_str()))
     {
-        ImGui::DragFloat("Rocks orbiting speed", &defaultOrbitSpeed, 0.1, 0.0f, 10.0f, "%.3f",
+        ImGui::DragFloat("Rocks orbiting speed", &defaultOrbitSpeed, 0.1f, 0.0f, 10.0f, "%.3f",
                          ImGuiSliderFlags_Logarithmic);
-        ImGui::DragFloat("Rocks self rotation speed", &defaultSelfRotationSpeed, 0.1, 0.0f, 10.0f, "%.3f",
+        ImGui::DragFloat("Rocks self rotation speed", &defaultSelfRotationSpeed, 0.1f, 0.0f, 10.0f, "%.3f",
                      ImGuiSliderFlags_Logarithmic);
     }
 }
@@ -149,7 +149,7 @@ void Rocks::drawNormalRocks(Shader& shader)
     for (size_t i = 0; i < model.meshes.size(); ++i)
     {
         glBindVertexArray(model.meshes[i].VAO);
-        glDrawElementsInstanced(GL_TRIANGLES, model.meshes[i].indices.size(), GL_UNSIGNED_INT, 0, numOfRocks);
+        glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(model.meshes[i].indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(numOfRocks));
         glBindVertexArray(0);
     }
 }

@@ -22,12 +22,12 @@ void Skybox::Initialize() {
 
 	std::string skytexture[6] =
 	{
-		"skybox/left.bmp", // right
-		"skybox/right.bmp", // left
-		"skybox/top.bmp", // top
-		"skybox/bottom.bmp", // bottom
-		"skybox/front.bmp", // front
-		"skybox/back.bmp" // back
+		"resources/skybox/left.bmp", // right
+		"resources/skybox/right.bmp", // left
+		"resources/skybox/top.bmp", // top
+		"resources/skybox/bottom.bmp", // bottom
+		"resources/skybox/front.bmp", // front
+		"resources/skybox/back.bmp" // back
 	};
 	for (int i = 0; i < 6; i++) { faces.push_back(skytexture[i]); }
 	cubeMapTexture = loadCubeMap(faces);
