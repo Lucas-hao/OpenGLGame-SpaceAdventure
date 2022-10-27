@@ -1,9 +1,8 @@
 #include "GameObject.h"
 
-#include "../dependencies/imgui/imgui.h"
-
-GameObject::GameObject(const string& modelPath)
+void GameObject::initialize(const string& objectName, const string& modelPath)
 {
+    this->objectName = objectName;
     model.initialize(modelPath);
 }
 
@@ -22,54 +21,34 @@ void GameObject::initialize(const string& objectName, const string& modelPath, g
 // draw the object
 void GameObject::draw(Shader& shader)
 {
+    colorTexture.bind(0);
     glm::mat4 modelMatrix = getModelMatrix();
     shader.setMat4("model", modelMatrix);
     model.draw(shader);
 }
 
-void GameObject::tick()
-{
-    // TODO to be implemented
-}
-
 void GameObject::guiRender()
 {
-    // Need to initialize the imgui first
-    if (ImGui::CollapsingHeader(objectName.c_str()))
+    if (ImGui::TreeNode((objectName + " basic settings").c_str()))
     {
         ImGui::DragFloat3((objectName + " position").c_str(), &position[0], 0.1f, -100.0f, 100.0f);
         ImGui::DragFloat3((objectName + " rotation").c_str(), &rotationAngle[0], 0.1f, -180.0f, 180.0f);
         ImGui::DragFloat3((objectName + " scale").c_str(), &scale[0], 0.1f, 0.0f, 10.0f);
-        ImGui::DragFloat((objectName + " movement speed").c_str(), &movementSpeed, 0.1f, 0.1f, 1000.0f, "%0.2f",
-                         ImGuiSliderFlags_Logarithmic);
 
         updateDirection();
 
         ImGui::Text("Front vector: (%.2f, %0.2f, %0.2f)", directionZ.x, directionZ.y, directionZ.z);
         ImGui::Text("Right vector: (%.2f, %0.2f, %0.2f)", directionX.x, directionX.y, directionX.z);
         ImGui::Text("Up vector: (%.2f, %0.2f, %0.2f)", directionY.x, directionY.y, directionY.z);
-
-        // float pos4f[4] = {position.x, position.y, position.z};
-        // position = glm::vec3(pos4f[0], pos4f[1], pos4f[2]);
-
-        // float rot4f[4] = {rotationAngle.x, rotationAngle.y, rotationAngle.z};
-        // rotationAngle = glm::vec3(rot4f[0], rot4f[1], rot4f[2]);
-
-        // float scale4f[4] = {scale.x, scale.y, scale.z};
-        // scale = glm::vec3(scale4f[0], scale4f[1], scale4f[2]);
-        
-        //
-        // printf("Front vector: (%.2f, %0.2f, %0.2f)\n", directionZ.x, directionZ.y, directionZ.z);
-        // printf("Right vector: (%.2f, %0.2f, %0.2f)\n", directionX.x, directionX.y, directionX.z);
-        // printf("Up vector: (%.2f, %0.2f, %0.2f)\n\n", directionY.x, directionY.y, directionY.z);
+        ImGui::TreePop();
     }
 }
 
-
-void GameObject::objectMovement(TranslationDirection direction, double deltaTime)
+bool GameObject::checkCollision(const GameObject& other, float threshold) const
 {
-    if (bMovable) translation(direction, movementSpeed * static_cast<float>(deltaTime));
+    return glm::length(position - other.getPosition()) < threshold;
 }
+
 
 void GameObject::translation(TranslationDirection direction, GLfloat distance)
 {

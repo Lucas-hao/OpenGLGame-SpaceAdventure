@@ -7,6 +7,7 @@
 
 Rocks::Rocks()
 {
+    // init texture needed
     bCollectedGold = std::vector<bool>(numOfGolds);
     bCollectedSapphire = std::vector<bool>(numOfSapphires);
     modelMatrix = std::vector<glm::mat4>(totalNum);
@@ -70,16 +71,22 @@ void Rocks::initialize(const string& objectName, const string& modelPath, glm::v
     this->objectName = objectName;
     model.initialize(modelPath);
     setupOpenGL();
+    colorTexture.setupTexture("resources/texture/rockTexture.bmp");
+    goldTexture.setupTexture("resources/texture/gold.bmp");
+    sapphireTexture.setupTexture("resources/texture/sapphire.bmp");
 }
 
 
 void Rocks::initialize(const string& objectName, const string& modelPath, glm::vec3 center, GLfloat radius)
 {
     this->objectName = objectName;
-    centerPosition = center;
-    orbitRadius = radius;
     model.initialize(modelPath);
     setupOpenGL();
+    colorTexture.setupTexture("resources/texture/rockTexture.bmp");
+    goldTexture.setupTexture("resources/texture/gold.bmp");
+    sapphireTexture.setupTexture("resources/texture/sapphire.bmp");
+    centerPosition = center;
+    orbitRadius = radius;
 }
 
 void Rocks::tick()
@@ -115,12 +122,17 @@ void Rocks::tick()
         model = glm::rotate(model, glm::radians(rotationNoise[i].z), glm::vec3(0.0f, 0.0f, 1.0f));
         modelMatrix[i] = model;
     }
+    // check whether win the game
+    if (!engine.getWin() && checkWin())
+    {
+        engine.setWin(true);
+    }
 }
 
 
 void Rocks::guiRender()
 {
-    if (!ImGui::CollapsingHeader(objectName.c_str()))
+    if (ImGui::CollapsingHeader(objectName.c_str()))
     {
         ImGui::DragFloat("Rocks orbiting speed", &defaultOrbitSpeed, 0.1f, 0.0f, 10.0f, "%.3f",
                          ImGuiSliderFlags_Logarithmic);
@@ -129,20 +141,9 @@ void Rocks::guiRender()
     }
 }
 
-
-void Rocks::prepareDraw()
-{
-    // glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
-    // glBufferData(GL_ARRAY_BUFFER, numOfRocks * sizeof(glm::mat4), &modelMatrix[0], GL_STATIC_DRAW);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-
 void Rocks::drawNormalRocks(Shader& shader)
 {
-    // Engine &engine = Engine::getEngine();
-    // ColorTexture rockTexture = engine.getRockTexture();
-    // rockTexture.bind(0);
+    colorTexture.bind(0);
     glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
     glBufferData(GL_ARRAY_BUFFER, numOfRocks * sizeof(glm::mat4), &modelMatrix[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -156,20 +157,16 @@ void Rocks::drawNormalRocks(Shader& shader)
 
 void Rocks::drawSpecialRocks(Shader& shader)
 {
-    Engine& engine = Engine::getEngine();
-    ColorTexture rockTexture = engine.getRockTexture();
-    ColorTexture goldTexture = engine.getGoldTexture();
-    ColorTexture sapphireTexture = engine.getSapphireTexture();
     for (size_t i = numOfRocks; i < numOfRocks + numOfGolds; ++i)
     {
         shader.setMat4("model", modelMatrix[i]);
-        bCollectedGold[i - numOfRocks] ? rockTexture.bind(0) : goldTexture.bind(0);
+        bCollectedGold[i - numOfRocks] ? colorTexture.bind(0) : goldTexture.bind(0);
         model.draw(shader);
     }
     for (size_t i = numOfRocks + numOfGolds; i < totalNum; ++i)
     {
         shader.setMat4("model", modelMatrix[i]);
-        bCollectedSapphire[i - numOfGolds - numOfRocks] ? rockTexture.bind(0) : sapphireTexture.bind(0);
+        bCollectedSapphire[i - numOfGolds - numOfRocks] ? colorTexture.bind(0) : sapphireTexture.bind(0);
         model.draw(shader);
     }
 }

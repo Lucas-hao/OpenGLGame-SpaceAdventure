@@ -10,6 +10,9 @@
 #include "gameobjects/Rocks.h"
 #include "Light.h"
 #include "Skybox.h"
+#include "gameobjects/EnemyCraft.h"
+#include "gameobjects/Planet.h"
+#include "gameobjects/Spacecraft.h"
 
 
 #define SCR_WIDTH 1080
@@ -33,19 +36,10 @@ public:
 
 private:
     // Object in this game
-    GameObject spaceCraft;
-    GameObject planet;
+    Spacecraft spaceCraft;
+    Planet planet;
     Rocks rocks;
-    std::array<GameObject, 3> enemyCrafts;
-    // Textures
-    ColorTexture earthNormalTexture;
-    ColorTexture earthColorTexture;
-    ColorTexture spaceCraftTexture;
-    ColorTexture enemyTravelTexture;
-    ColorTexture enemyAlertTexture;
-    ColorTexture rockTexture;
-    ColorTexture goldTexture;
-    ColorTexture sapphireTexture;
+    std::array<EnemyCraft, 3> enemyCrafts;
     // Shaders
     Shader defaultShader;
     Shader planetShader;
@@ -54,24 +48,19 @@ private:
     // Camera
     Camera camera = Camera(glm::vec3(0.0f, 0.0f, 88.0f));
     // Light
-    Light light0;
-    Light light1;
+    std::array<Light, 2> lights;
     // Skybox
     Skybox skybox;
-
-
+    
     glm::mat4 projMatrix = glm::mat4(1.0f);
     GLFWwindow* globalWindow = nullptr;
+
+    bool bWin = false;
 
     // time
     double lastFrameTime = 0.0;
     double deltaTime = 0.0;
     int fps = 0;
-
-    // rotation speed
-    float craftRotateSpeed = 20.0f;
-    float planetRotateSpeed = 20.0f;
-    float enemyMovementSpeed = 10.0f;
 
     // Interaction
     double lastMousePosX = 0.0;
@@ -110,19 +99,9 @@ public:
     void terminate();
     void tick();
 
-    void spacecraftMovement(GameObject::TranslationDirection direction)
-    {
-        spaceCraft.objectMovement(direction, deltaTime);
-    }
-
     void cameraMovement(CameraMovement direction)
     {
         camera.cameraMovement(direction, deltaTime);
-    }
-
-    void spaceCraftRotation(GameObject::RotationDirection direction, float degree)
-    {
-        spaceCraft.rotation(direction, degree);
     }
 
     void cameraRotation(float xoffset, float yoffset)
@@ -151,16 +130,16 @@ public:
 
     void lightIntensityControl(float delta)
     {
-        float intensity = light0.getIntensity() + delta;
+        float intensity = lights[0].getIntensity() + delta;
         intensity = std::min(1.0f, intensity);
         intensity = std::max(0.0f, intensity);
-        light0.setIntensity(intensity);
+        lights[0].setIntensity(intensity);
     }
 
     glm::vec3 getSpaceCraftLoc() const { return spaceCraft.getPosition(); }
-    ColorTexture getRockTexture() const { return rockTexture; }
-    ColorTexture getGoldTexture() const { return goldTexture; }
-    ColorTexture getSapphireTexture() const { return sapphireTexture; }
+    bool getWin() const { return bWin; }
+    void setWin(bool win) { bWin = win; }
+    
 
     void setInitX(int xx) { if (xx >= 0) initX = xx; }
     void setInitY(int yy) { if (yy >= 0) initY = yy; }

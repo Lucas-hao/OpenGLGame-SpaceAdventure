@@ -50,40 +50,20 @@ void Engine::initialize()
     glfwSetFramebufferSizeCallback(globalWindow, frameResizeCallback);
 
     // Light setup
-    light0.setPosition(glm::vec3(0.0f, 30.0f, 0.0f));
-    light0.setColor(glm::vec3(0.9f, 0.72f, 0.0f));
-
-    light0.setPosition(glm::vec3(0.0f, 0.0f, 40.0f));
-    light0.setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+    lights[0] = Light(glm::vec3(0.0f, 30.0f, 0.0f), glm::vec3(0.9f, 0.72f, 0.0f));
+    lights[1] = Light(glm::vec3(0.0f, 0.0f, 40.0f), glm::vec3(1.0f, 0.5f, 0.0f));
 
     // ProjMatrix setup
     projMatrix = glm::perspective(glm::radians(45.0f), static_cast<float>(SCR_WIDTH) / SCR_HEIGHT, 0.1f, 500.0f);
 
     // Default game object initialization
     // Rocks rocks;
-    spaceCraft.initialize("SpaceCraft", "resources/object/spacecraft.obj", glm::vec3(0.0f, -1.0f, 80.0f),
-                          glm::vec3(0.005f, 0.005f, 0.005f),
-                          glm::vec3(0.0f, 180.0f, 0.0f));
-    enemyCrafts[0].initialize("EnemyCraft0", "resources/object/craft.obj", glm::vec3(-30.0f, 0.0f, 30.0f),
-                              glm::vec3(0.3f, 0.3f, 0.3f));
-    enemyCrafts[1].initialize("EnemyCraft1", "resources/object/craft.obj", glm::vec3(0.0f, 0.0f, 40.0f),
-                              glm::vec3(0.3f, 0.3f, 0.3f));
-    enemyCrafts[2].initialize("EnemyCraft2", "resources/object/craft.obj", glm::vec3(30.0f, 0.0f, 50.0f),
-                              glm::vec3(0.3f, 0.3f, 0.3f));
-    planet.initialize("Planet", "object/planet.obj", glm::vec3(0, 0, 0.0f), glm::vec3(2, 2, 2),
-                      glm::vec3(0.0f, 0.0f, 0.0f));
-    rocks.initialize("Rocks", "object/rock.obj");
-    planet.setMovable(false);
-
-    // Default texture initialization
-    spaceCraftTexture.setupTexture("resources/texture/spacecraftTexture.bmp");
-    enemyTravelTexture.setupTexture("resources/texture/ringTexture.bmp");
-    enemyAlertTexture.setupTexture("resources/texture/red.bmp");
-    earthColorTexture.setupTexture("resources/texture/earthTexture.bmp");
-    earthNormalTexture.setupTexture("resources/texture/earthNormal.bmp");
-    rockTexture.setupTexture("resources/texture/rockTexture.bmp");
-    goldTexture.setupTexture("resources/texture/gold.bmp");
-    sapphireTexture.setupTexture("resources/texture/sapphire.bmp");
+    spaceCraft.initialize("SpaceCraft", "resources/object/spacecraft.obj");
+    planet.initialize("Planet", "resources/object/planet.obj");
+    rocks.initialize("Rocks", "resources/object/rock.obj");
+    enemyCrafts[0].initialize("EnemyCraft0", "resources/object/craft.obj", glm::vec3(-30.0f, 0.0f, 30.0f));
+    enemyCrafts[1].initialize("EnemyCraft1", "resources/object/craft.obj", glm::vec3(0.0f, 0.0f, 40.0f));
+    enemyCrafts[2].initialize("EnemyCraft2", "resources/object/craft.obj", glm::vec3(30.0f, 0.0f, 50.0f));
 
     // shader set up
     defaultShader.setupShader("resources/shader/VertexShaderCode.glsl", "resources/shader/FragmentShaderCode.glsl");
@@ -121,8 +101,8 @@ void Engine::render()
     defaultShader.setMat4("proj", projMatrix);
     defaultShader.setMat4("view", viewMatrix);
     // Point Light 1
-    defaultShader.setVec3("pointLights[0].position", light0.getPosition());
-    defaultShader.setVec3("pointLights[0].color", light0.getFinalColor());
+    defaultShader.setVec3("pointLights[0].position", lights[0].getPosition());
+    defaultShader.setVec3("pointLights[0].color", lights[0].getFinalColor());
     defaultShader.setVec3("pointLights[0].ambient", 0.4f, 0.4f, 0.4f);
     defaultShader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
     defaultShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
@@ -130,8 +110,8 @@ void Engine::render()
     defaultShader.setFloat("pointLights[0].linear", 0.00009f);
     defaultShader.setFloat("pointLights[0].quadratic", 0.000032f);
     // Point Light 2
-    defaultShader.setVec3("pointLights[1].position", light1.getPosition());
-    defaultShader.setVec3("pointLights[1].color", light1.getFinalColor());
+    defaultShader.setVec3("pointLights[1].position", lights[1].getPosition());
+    defaultShader.setVec3("pointLights[1].color", lights[1].getFinalColor());
     defaultShader.setVec3("pointLights[1].ambient", 0.3f, 0.3f, 0.3f);
     defaultShader.setVec3("pointLights[1].diffuse", 0.2f, 0.2f, 0.2f);
     defaultShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
@@ -140,10 +120,8 @@ void Engine::render()
     defaultShader.setFloat("pointLights[1].quadratic", 0.000032f);
     // View position
     defaultShader.setVec3("viewPos", camera.getPosition());
-    spaceCraftTexture.bind(0);
     spaceCraft.draw(defaultShader);
     rocks.drawSpecialRocks(defaultShader);
-    enemyTravelTexture.bind(0);
     enemyCrafts[0].draw(defaultShader);
     enemyCrafts[1].draw(defaultShader);
     enemyCrafts[2].draw(defaultShader);
@@ -151,11 +129,11 @@ void Engine::render()
     planetShader.use();
     planetShader.setMat4("proj", projMatrix);
     planetShader.setMat4("view", viewMatrix);
-    planetShader.setVec3("lightPos[0]", light0.getPosition());
-    planetShader.setVec3("lightPos[1]", light1.getPosition());
+    planetShader.setVec3("lightPos[0]", lights[0].getPosition());
+    planetShader.setVec3("lightPos[1]", lights[1].getPosition());
     planetShader.setVec3("viewPos", camera.getPosition());
     // Point Light 0
-    planetShader.setVec3("pointLights[0].color", light0.getFinalColor());
+    planetShader.setVec3("pointLights[0].color", lights[0].getFinalColor());
     planetShader.setVec3("pointLights[0].ambient", 0.4f, 0.4f, 0.4f);
     planetShader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
     planetShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
@@ -163,26 +141,23 @@ void Engine::render()
     planetShader.setFloat("pointLights[0].linear", 0.00009f);
     planetShader.setFloat("pointLights[0].quadratic", 0.000032f);
     // Point Light 1
-    planetShader.setVec3("pointLights[1].color", light1.getFinalColor());
+    planetShader.setVec3("pointLights[1].color", lights[1].getFinalColor());
     planetShader.setVec3("pointLights[1].ambient", 0.3f, 0.3f, 0.3f);
     planetShader.setVec3("pointLights[1].diffuse", 0.2f, 0.2f, 0.2f);
     planetShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
     planetShader.setFloat("pointLights[1].constant", 1.0f);
     planetShader.setFloat("pointLights[1].linear", 0.00009f);
     planetShader.setFloat("pointLights[1].quadratic", 0.000032f);
-    earthColorTexture.bind(0);
-    earthNormalTexture.bind(1);
     planet.draw(planetShader);
 
 
     // draw the rocks
-    rocks.prepareDraw();
     rockInstanceShader.use();
     rockInstanceShader.setMat4("proj", projMatrix);
     rockInstanceShader.setMat4("view", viewMatrix);
     // Point Light 1
-    rockInstanceShader.setVec3("pointLights[0].position", light0.getPosition());
-    rockInstanceShader.setVec3("pointLights[0].color", light0.getFinalColor());
+    rockInstanceShader.setVec3("pointLights[0].position", lights[0].getPosition());
+    rockInstanceShader.setVec3("pointLights[0].color", lights[0].getFinalColor());
     rockInstanceShader.setVec3("pointLights[0].ambient", 0.4f, 0.4f, 0.4f);
     rockInstanceShader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
     rockInstanceShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
@@ -190,8 +165,8 @@ void Engine::render()
     rockInstanceShader.setFloat("pointLights[0].linear", 0.0009f);
     rockInstanceShader.setFloat("pointLights[0].quadratic", 0.00032f);
     // Point Light 2
-    rockInstanceShader.setVec3("pointLights[1].position", light1.getPosition());
-    rockInstanceShader.setVec3("pointLights[1].color", light1.getPosition());
+    rockInstanceShader.setVec3("pointLights[1].position", lights[1].getPosition());
+    rockInstanceShader.setVec3("pointLights[1].color", lights[1].getFinalColor());
     rockInstanceShader.setVec3("pointLights[1].ambient", 0.4f, 0.4f, 0.4f);
     rockInstanceShader.setVec3("pointLights[1].diffuse", 0.3f, 0.3f, 0.3f);
     rockInstanceShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
@@ -200,7 +175,6 @@ void Engine::render()
     rockInstanceShader.setFloat("pointLights[1].quadratic", 0.00032f);
     // View position
     rockInstanceShader.setVec3("viewPos", camera.getPosition());
-    rockTexture.bind(0);
     rocks.drawNormalRocks(rockInstanceShader);
 
     skybox.draw(skyboxShader);
@@ -236,12 +210,13 @@ void Engine::renderGui()
         ImGui::Text("All free camera mode");
         break;
     }
-    spaceCraft.guiRender();
-    enemyCrafts[0].guiRender();
-    enemyCrafts[1].guiRender();
-    enemyCrafts[2].guiRender();
-    planet.guiRender();
     camera.guiRender();
+    spaceCraft.guiRender();
+    for (size_t i = 0; i < enemyCrafts.size(); ++i)
+    {
+        enemyCrafts[i].guiRender();
+    }
+    planet.guiRender();
     rocks.guiRender();
     ImGui::End();
 
@@ -307,37 +282,9 @@ void Engine::tick()
             spaceCraft.getPosition() + spaceCraft.getZDirection() * glm::vec3(10.0f));
     }
 
-    planet.setRotationYaw(0.5f * static_cast<float>(glfwGetTime()) * planetRotateSpeed);
-    float newVerticalOffset[3] = {
-        enemyCrafts[0].getPosition().x, enemyCrafts[1].getPosition().x, enemyCrafts[2].getPosition().x
-    };
-
-    static bool bPositiveDir[3] = {true, true, true};
-    for (size_t i = 0; i < 3; ++i)
-    {
-        if (bPositiveDir[i])
-        {
-            newVerticalOffset[i] += static_cast<float>(deltaTime) * enemyMovementSpeed;
-            newVerticalOffset[i] -= 200.0f * static_cast<int>((newVerticalOffset[i] + 50.0f) / 200.0f);
-            if (newVerticalOffset[i] > 50.0f)
-            {
-                newVerticalOffset[i] = 100.0f - newVerticalOffset[i];
-                bPositiveDir[i] = false;
-            }
-        }
-        else
-        {
-            newVerticalOffset[i] -= static_cast<float>(deltaTime) * enemyMovementSpeed;
-            newVerticalOffset[i] -= 200.0f * static_cast<int>((newVerticalOffset[i] + 50.0f) / 200.0f);
-            if (newVerticalOffset[i] < -50.0f)
-            {
-                newVerticalOffset[i] = -100.0f - newVerticalOffset[i];
-                bPositiveDir[i] = true;
-            }
-        }
-        enemyCrafts[i].setPosition(glm::vec3(newVerticalOffset[i], 0.0f, 30.0f + 10 * i));
-    }
+    planet.tick();
     rocks.tick();
+    for (size_t i = 0; i < enemyCrafts.size(); ++i) enemyCrafts[i].tick();
 }
 
 void Engine::cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -358,7 +305,7 @@ void Engine::cursorPositionCallback(GLFWwindow* window, double xpos, double ypos
     float deltaX = static_cast<float>(engine.lastMousePosX - xpos);
     if (engine.camera.getMode() == CameraMode::ATTACH)
     {
-        engine.spaceCraftRotation(GameObject::RotationDirection::Y_AXIS, deltaX * 0.01f);
+        engine.spaceCraft.spacecraftRotation(deltaX);
     }
     else if (engine.camera.getMode() == CameraMode::ALL_FREE)
     {
@@ -387,21 +334,24 @@ void Engine::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
     case CameraMode::ATTACH:
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         {
-            engine.spacecraftMovement(GameObject::TranslationDirection::FRONT);
+            engine.spaceCraft.spacecraftMovement(TranslationDirection::FRONT, static_cast<float>(engine.deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         {
-            engine.spacecraftMovement(GameObject::TranslationDirection::BACK);
+            engine.spaceCraft.spacecraftMovement(TranslationDirection::BACK, static_cast<float>(engine.deltaTime));
+            // engine.spacecraftMovement(TranslationDirection::BACK);
         }
     // Notice that our view point are from the camera
     // so the right and left translation are reversed
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         {
-            engine.spacecraftMovement(GameObject::TranslationDirection::RIGHT);
+            engine.spaceCraft.spacecraftMovement(TranslationDirection::RIGHT, static_cast<float>(engine.deltaTime));
+            // engine.spacecraftMovement(TranslationDirection::RIGHT);
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         {
-            engine.spacecraftMovement(GameObject::TranslationDirection::LEFT);
+            engine.spaceCraft.spacecraftMovement(TranslationDirection::LEFT, static_cast<float>(engine.deltaTime));
+            // engine.spacecraftMovement(TranslationDirection::LEFT);
         }
         break;
     case CameraMode::MOVEMENT_FREE:

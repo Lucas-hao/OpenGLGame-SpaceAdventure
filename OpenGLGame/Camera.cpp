@@ -96,7 +96,7 @@ void Camera::updateCameraVectors(glm::vec3 newPosition, glm::vec3 newCenter)
 
 void Camera::guiRender()
 {
-	if (ImGui::CollapsingHeader("Camera"))
+	if (!ImGui::CollapsingHeader("Camera"))
 	{
 		ImGui::DragFloat3("Camera position", &position[0], 0.1f, -200.0f, 200.0f);
 
