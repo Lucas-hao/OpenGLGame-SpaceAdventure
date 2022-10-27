@@ -18,4 +18,4 @@ Features implemented in the application include:
 
 ![](screenshot/game-screenshot1.png)
 
-![](screenshot\game-screenshot0.png)
+![](screenshot/game-screenshot0.png)
